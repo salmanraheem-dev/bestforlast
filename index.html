@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Connect your TRON wallet securely via Trust Wallet." />
+    <meta name="theme-color" content="#0a0c12" />
+    <title>TRON Wallet</title>
+
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    />
+  </head>
+  <body>
+
+    <!-- ─── Loading overlay (shown while JS initialises) ─────────────────── -->
+    <div id="bootOverlay" class="boot-overlay">
+      <div class="boot-ring"></div>
+    </div>
+
+    <!-- ─── Main screen ───────────────────────────────────────────────────── -->
+    <main class="screen">
+
+      <!-- Ambient glows -->
+      <div class="glow glow-top"></div>
+      <div class="glow glow-bottom"></div>
+
+      <!-- Logo / brand -->
+      <div class="brand">
+        <div class="logo-ring">
+          <!-- TRON "T" SVG -->
+          <svg class="tron-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" fill="url(#hex)" />
+            <path d="M14 15h12M20 15v10" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="hex" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#eb0029"/>
+                <stop offset="1" stop-color="#ff5c35"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <h1 class="brand-name">TRON Wallet</h1>
+        <p class="brand-sub">Powered by WalletConnect &amp; Trust Wallet</p>
+      </div>
+
+      <!-- ─── State: Connecting ────────────────────────────────────────────── -->
+      <div id="viewConnecting" class="view" hidden>
+        <div class="card">
+          <div class="card-icon connecting-icon">
+            <span class="dot-ring"></span>
+          </div>
+          <p id="connectingMsg" class="card-title">Connecting…</p>
+          <p class="card-sub" id="connectingSub">Opening Trust Wallet</p>
+        </div>
+      </div>
+
+      <!-- AppKit renders its own QR modal automatically on desktop -->
+
+      <!-- ─── State: Connected ─────────────────────────────────────────────── -->
+      <div id="viewConnected" class="view" hidden>
+        <div class="card card-connected">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+              <circle cx="12" cy="12" r="10" fill="#00c87a22"/>
+              <path d="M7.5 12l3 3 6-6" stroke="#00c87a" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="card-title" style="color:#00c87a">Wallet Connected</p>
+          <div class="address-row">
+            <span class="dot-live"></span>
+            <code id="walletAddr" class="wallet-addr">–</code>
+          </div>
+          <div class="network-pill">
+            <span class="network-dot"></span>
+            TRON Mainnet
+          </div>
+        </div>
+
+        <button id="btnDisconnect" class="btn btn-danger">Disconnect</button>
+      </div>
+
+      <!-- ─── State: Error ──────────────────────────────────────────────────── -->
+      <div id="viewError" class="view" hidden>
+        <div class="card card-error">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+              <circle cx="12" cy="12" r="10" fill="#eb002922"/>
+              <path d="M12 7v5M12 16h.01" stroke="#eb0029" stroke-width="2.2"
+                stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="card-title" style="color:#eb0029">Connection Failed</p>
+          <p id="errorMsg" class="card-sub"></p>
+        </div>
+
+        <button id="btnRetry" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18" style="flex-shrink:0">
+            <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Try Again
+        </button>
+      </div>
+
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

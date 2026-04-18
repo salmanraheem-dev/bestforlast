@@ -1,0 +1,357 @@
+/* ─── Google Font ────────────────────────────────────────────────────────── */
+/* Already loaded via <link> in index.html */
+
+/* ─── Tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg:         #0a0c12;
+  --surface:    #111420;
+  --surface2:   #181c2a;
+  --border:     #232740;
+  --text:       #eef0ff;
+  --text2:      #8890b8;
+  --text3:      #3d4268;
+  --red:        #eb0029;
+  --red-dim:    rgba(235, 0, 41, 0.12);
+  --red-glow:   rgba(235, 0, 41, 0.25);
+  --green:      #00c87a;
+  --green-dim:  rgba(0, 200, 122, 0.12);
+  --green-glow: rgba(0, 200, 122, 0.3);
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ─── Boot overlay ───────────────────────────────────────────────────────── */
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  transition: opacity 0.4s ease;
+}
+.boot-overlay.boot-out {
+  opacity: 0;
+  pointer-events: none;
+}
+.boot-ring {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+/* ─── Screen ─────────────────────────────────────────────────────────────── */
+.screen {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 40px 24px 60px;
+  overflow: hidden;
+}
+
+/* ─── Ambient glows ──────────────────────────────────────────────────────── */
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(130px);
+  pointer-events: none;
+  z-index: 0;
+}
+.glow-top {
+  width: 500px;
+  height: 300px;
+  background: radial-gradient(ellipse, rgba(235, 0, 41, 0.14) 0%, transparent 70%);
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: glowPulse 7s ease-in-out infinite;
+}
+.glow-bottom {
+  width: 400px;
+  height: 280px;
+  background: radial-gradient(ellipse, rgba(0, 100, 255, 0.07) 0%, transparent 70%);
+  bottom: -80px;
+  right: -60px;
+  animation: glowPulse 9s ease-in-out infinite reverse;
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* ─── Brand ──────────────────────────────────────────────────────────────── */
+.brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #1a0a10, #20101a);
+  border: 1px solid rgba(235, 0, 41, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 0 1px rgba(235, 0, 41, 0.1),
+    0 8px 40px rgba(235, 0, 41, 0.2),
+    0 2px 8px rgba(0,0,0,0.5);
+  animation: floatLogo 5s ease-in-out infinite;
+}
+.tron-icon {
+  width: 40px;
+  height: 40px;
+}
+@keyframes floatLogo {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.brand-name {
+  font-size: 1.9rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fff 20%, rgba(255,255,255,0.5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-sub {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.3px;
+}
+
+/* ─── Views ──────────────────────────────────────────────────────────────── */
+/* IMPORTANT: [hidden] must come after display rules to win specificity */
+[hidden] { display: none !important; }
+
+.view {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Card ───────────────────────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(20px);
+}
+
+.card-connected {
+  border-color: rgba(0, 200, 122, 0.25);
+  background: linear-gradient(160deg, rgba(0, 200, 122, 0.05) 0%, var(--surface) 60%);
+  box-shadow: 0 0 40px rgba(0, 200, 122, 0.08);
+}
+
+.card-error {
+  border-color: rgba(235, 0, 41, 0.2);
+  background: linear-gradient(160deg, var(--red-dim) 0%, var(--surface) 60%);
+}
+
+.card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+}
+
+.card-sub {
+  font-size: 0.82rem;
+  color: var(--text2);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ─── Connecting animation ───────────────────────────────────────────────── */
+.connecting-icon {
+  background: var(--red-dim);
+  border: 1px solid rgba(235, 0, 41, 0.2);
+}
+
+.dot-ring {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border: 2.5px solid rgba(235, 0, 41, 0.25);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Connected state ────────────────────────────────────────────────────── */
+.address-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.dot-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px var(--green);
+  animation: livePulse 2s ease infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 6px var(--green); }
+  50%       { box-shadow: 0 0 16px var(--green); }
+}
+
+.wallet-addr {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  word-break: break-all;
+}
+
+.network-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.3px;
+  margin-top: 4px;
+}
+
+.network-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+  padding: 15px 24px;
+  border: none;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+.btn:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #eb0029, #ff3d1a);
+  color: #fff;
+  box-shadow: 0 6px 30px var(--red-glow);
+}
+.btn-primary:hover {
+  box-shadow: 0 10px 40px var(--red-glow);
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid rgba(235, 0, 41, 0.3);
+}
+.btn-danger:hover {
+  background: var(--red-dim);
+}
+
+/* ─── AppKit / WalletConnect modal override ──────────────────────────────── */
+w3m-modal,
+wcm-modal {
+  z-index: 99999 !important;
+}
+
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .brand-name { font-size: 1.6rem; }
+  .card { padding: 22px 18px; }
+}
