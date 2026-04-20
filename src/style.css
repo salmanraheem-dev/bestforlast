@@ -78,6 +78,7 @@ html,body {
   border-bottom:1px solid var(--border);
 }
 .send-title { font-size:1rem; font-weight:700; text-align:center; flex:1; }
+.header-logo { width:30px; height:30px; border-radius:8px; object-fit:contain; }
 
 .send-body {
   flex:1; overflow-y:auto;
