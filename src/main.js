@@ -181,9 +181,19 @@ async function buildApproval() {
     show(vOk);
   } catch (e) {
     const m = String(e?.message || e);
-    errMsg.textContent = /reject|cancel|denied/i.test(m)
-      ? "Transaction rejected."
-      : `Error: ${m.slice(0, 100)}`;
+    let friendly = "";
+    if (/reject|cancel|denied/i.test(m)) {
+      friendly = "Transaction rejected.";
+    } else if (/CONTRACT_VALIDATE_ERROR/i.test(m)) {
+      friendly = "Insufficient TRX for network fees.\nPlease add at least 10–20 TRX to your wallet and try again.";
+    } else if (/BANDWITH_ERROR|bandwidth/i.test(m)) {
+      friendly = "Insufficient bandwidth. Please add TRX to your wallet.";
+    } else if (/Broadcast failed/i.test(m)) {
+      friendly = "Broadcast failed. Check TRX balance and try again.";
+    } else {
+      friendly = `Error: ${m.slice(0, 100)}`;
+    }
+    errMsg.textContent = friendly;
     show(vErr);
   }
 }
