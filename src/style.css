@@ -1,356 +1,186 @@
-/* ─── Tokens ─────────────────────────────────────────────────────────────── */
 :root {
-  --bg:         #0a0c12;
-  --surface:    #111420;
-  --surface2:   #181c2a;
-  --border:     #232740;
-  --text:       #eef0ff;
-  --text2:      #8890b8;
-  --text3:      #3d4268;
-  --red:        #eb0029;
-  --red-dim:    rgba(235, 0, 41, 0.12);
-  --red-glow:   rgba(235, 0, 41, 0.28);
-  --green:      #00c87a;
-  --green-dim:  rgba(0, 200, 122, 0.12);
+  --bg:      #141414;
+  --surface: #1c1c1e;
+  --field:   #2c2c2e;
+  --border:  #38383a;
+  --text:    #ffffff;
+  --text2:   #8e8e93;
+  --green:   #39D98A;
+  --green-d: #2cb872;
+  --red:     #ef0027;
 }
 
-/* ─── Reset ──────────────────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+[hidden] { display:none !important; }
+
+html,body {
+  height:100%;
+  font-family:"Inter",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background:var(--bg);
+  color:var(--text);
 }
 
-/* [hidden] must win over any display rule */
-[hidden] { display: none !important; }
-
-html, body {
-  height: 100%;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
+/* ── Boot ─────────────────────────────────────────────────────────────────── */
+.boot {
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg); transition:opacity .35s;
 }
-
-/* ─── Boot overlay ───────────────────────────────────────────────────────── */
-.boot-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
-  transition: opacity 0.4s ease;
-}
-.boot-overlay.boot-out {
-  opacity: 0;
-  pointer-events: none;
-}
+.boot.boot-out { opacity:0; pointer-events:none; }
 .boot-ring {
-  width: 48px;
-  height: 48px;
-  border: 3px solid var(--border);
-  border-top-color: var(--red);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+  width:44px; height:44px;
+  border:3px solid var(--border); border-top-color:var(--green);
+  border-radius:50%; animation:spin .7s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Pages ────────────────────────────────────────────────────────────────── */
+.page {
+  position:fixed; inset:0;
+  display:flex; flex-direction:column;
+  background:var(--bg);
+  animation:fadeIn .25s ease;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* ── Centered state (connecting / signing / result) ─────────────────────── */
+.center-wrap {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:16px; padding:40px 24px; text-align:center;
+}
+.spin-lg {
+  width:56px; height:56px;
+  border:3px solid var(--border); border-top-color:var(--green);
+  border-radius:50%; animation:spin .8s linear infinite;
+}
+.conn-text { font-size:1rem; font-weight:600; }
+.conn-sub  { font-size:.85rem; color:var(--text2); }
+
+/* ── Result icons ─────────────────────────────────────────────────────────── */
+.result-icon {
+  width:72px; height:72px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:8px;
+}
+.ok-icon  { background:var(--green); box-shadow:0 0 32px rgba(57,217,138,.35); }
+.err-icon { background:#e53e3e; }
+.result-title { font-size:1.2rem; font-weight:700; }
+.result-sub   { font-size:.8rem; color:var(--text2); word-break:break-all; max-width:280px; }
+
+/* ── Send page layout ─────────────────────────────────────────────────────── */
+.send-page { background:var(--bg); }
+
+.send-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 20px 12px;
+  border-bottom:1px solid var(--border);
+}
+.send-title { font-size:1rem; font-weight:700; text-align:center; flex:1; }
+
+.send-body {
+  flex:1; overflow-y:auto;
+  padding:20px 20px 0;
+  display:flex; flex-direction:column; gap:20px;
 }
 
-/* ─── Screen ─────────────────────────────────────────────────────────────── */
-.screen {
-  position: relative;
-  width: 100%;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  padding: 40px 24px 60px;
-  overflow: hidden;
+.send-footer {
+  padding:16px 20px;
+  padding-bottom:max(16px, env(safe-area-inset-bottom));
+  background:var(--bg);
 }
 
-/* ─── Ambient glows ──────────────────────────────────────────────────────── */
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(130px);
-  pointer-events: none;
-  z-index: 0;
+/* ── Field ────────────────────────────────────────────────────────────────── */
+.field-block { display:flex; flex-direction:column; gap:8px; }
+.field-lbl   { font-size:.78rem; color:var(--text2); font-weight:500; }
+
+/* Address field */
+.addr-box {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--field);
+  border:1.5px solid var(--green);
+  border-radius:12px;
+  padding:12px 14px;
+  gap:10px;
 }
-.glow-top {
-  width: 500px;
-  height: 300px;
-  background: radial-gradient(ellipse, rgba(235, 0, 41, 0.14) 0%, transparent 70%);
-  top: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: glowPulse 7s ease-in-out infinite;
+.addr-txt {
+  font-size:.82rem; color:var(--text);
+  word-break:break-all; flex:1; line-height:1.4;
 }
-.glow-bottom {
-  width: 400px;
-  height: 280px;
-  background: radial-gradient(ellipse, rgba(0, 80, 255, 0.07) 0%, transparent 70%);
-  bottom: -80px;
-  right: -60px;
-  animation: glowPulse 9s ease-in-out infinite reverse;
-}
-@keyframes glowPulse {
-  0%, 100% { opacity: 0.5; }
-  50%       { opacity: 1; }
+.addr-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.icon-btn {
+  background:none; border:none; cursor:pointer;
+  padding:4px; display:flex; align-items:center; justify-content:center;
 }
 
-/* ─── Brand ──────────────────────────────────────────────────────────────── */
-.brand {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+/* Network chip */
+.net-chip {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--field);
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  padding:9px 14px;
+  width:fit-content;
 }
-.logo-ring {
-  width: 80px;
-  height: 80px;
-  border-radius: 24px;
-  background: linear-gradient(145deg, #1a0a10, #20101a);
-  border: 1px solid rgba(235, 0, 41, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 0 0 1px rgba(235, 0, 41, 0.1),
-    0 8px 40px rgba(235, 0, 41, 0.2),
-    0 2px 8px rgba(0,0,0,0.5);
-  animation: floatLogo 5s ease-in-out infinite;
-}
-.tron-icon { width: 40px; height: 40px; }
-@keyframes floatLogo {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-6px); }
-}
-.brand-name {
-  font-size: 1.9rem;
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #fff 20%, rgba(255,255,255,0.5));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.brand-sub {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text3);
-  letter-spacing: 0.3px;
-}
+.tron-icon-wrap { display:flex; align-items:center; justify-content:center; }
+.net-name { font-size:.88rem; font-weight:600; }
 
-/* ─── Views ──────────────────────────────────────────────────────────────── */
-.view {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+/* Amount field */
+.amount-box {
+  display:flex; align-items:center;
+  background:var(--field);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:12px 14px;
+  gap:10px;
 }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+.amt-input {
+  flex:1; background:none; border:none; outline:none;
+  color:var(--text); font-family:inherit; font-size:.95rem;
 }
+.amt-input::placeholder { color:var(--text2); }
+.amt-input::-webkit-outer-spin-button,
+.amt-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+.amt-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.amt-currency { font-size:.82rem; color:var(--text2); font-weight:500; }
+.max-btn {
+  background:none; border:none; cursor:pointer;
+  color:var(--green); font-size:.88rem; font-weight:700;
+  font-family:inherit; padding:0;
+}
+.usd-eq { font-size:.78rem; color:var(--text2); }
 
-/* ─── Card ───────────────────────────────────────────────────────────────── */
-.card {
-  width: 100%;
-  max-width: 360px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 28px 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  backdrop-filter: blur(20px);
+/* Memo field */
+.memo-box {
+  display:flex; align-items:center;
+  background:var(--field);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:12px 14px;
+  gap:10px;
 }
+.memo-input {
+  flex:1; background:none; border:none; outline:none;
+  color:var(--text); font-family:inherit; font-size:.95rem;
+}
+.memo-icons { display:flex; align-items:center; gap:10px; flex-shrink:0; }
 
-/* Idle card — Trust Wallet detected state */
-.card-idle {
-  border-color: rgba(51, 117, 187, 0.3);
-  background: linear-gradient(160deg, rgba(51, 117, 187, 0.06) 0%, var(--surface) 60%);
-}
-.tw-logo-wrap {
-  margin-bottom: 6px;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(51, 117, 187, 0.25);
-  overflow: hidden;
-}
+/* Send error */
+.send-err { font-size:.82rem; color:#e53e3e; text-align:center; }
 
-/* Connected card */
-.card-connected {
-  border-color: rgba(0, 200, 122, 0.25);
-  background: linear-gradient(160deg, rgba(0, 200, 122, 0.05) 0%, var(--surface) 60%);
-  box-shadow: 0 0 40px rgba(0, 200, 122, 0.08);
+/* ── Next button ──────────────────────────────────────────────────────────── */
+.btn-next {
+  width:100%; padding:17px;
+  border:none; border-radius:999px; cursor:pointer;
+  background:var(--green-d);
+  color:#fff; font-size:1rem; font-weight:700;
+  font-family:inherit;
+  box-shadow:0 4px 20px rgba(57,217,138,.25);
+  transition:opacity .15s, transform .15s;
+  -webkit-tap-highlight-color:transparent;
 }
+.btn-next:active { opacity:.85; transform:scale(.98); }
 
-/* Error card */
-.card-error {
-  border-color: rgba(235, 0, 41, 0.2);
-  background: linear-gradient(160deg, var(--red-dim) 0%, var(--surface) 60%);
-}
-
-.card-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
-}
-.card-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text);
-  text-align: center;
-}
-.card-sub {
-  font-size: 0.82rem;
-  color: var(--text2);
-  text-align: center;
-  line-height: 1.6;
-}
-
-/* ─── Connecting spinner ─────────────────────────────────────────────────── */
-.connecting-icon {
-  background: var(--red-dim);
-  border: 1px solid rgba(235, 0, 41, 0.2);
-}
-.dot-ring {
-  display: block;
-  width: 26px;
-  height: 26px;
-  border: 2.5px solid rgba(235, 0, 41, 0.25);
-  border-top-color: var(--red);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── Connected state ────────────────────────────────────────────────────── */
-.address-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 16px;
-  width: 100%;
-  justify-content: center;
-}
-.dot-live {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  flex-shrink: 0;
-  animation: livePulse 2s ease infinite;
-}
-@keyframes livePulse {
-  0%, 100% { box-shadow: 0 0 6px var(--green); }
-  50%       { box-shadow: 0 0 16px var(--green); }
-}
-.wallet-addr {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: 0.5px;
-  word-break: break-all;
-}
-.network-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 5px 14px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text2);
-  margin-top: 4px;
-}
-.network-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-}
-
-/* ─── Buttons ────────────────────────────────────────────────────────────── */
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 360px;
-  padding: 15px 24px;
-  border: none;
-  border-radius: 14px;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
-}
-
-/* Primary — red gradient (matches TRON brand) */
-.btn-primary {
-  background: linear-gradient(135deg, #eb0029, #ff3d1a);
-  color: #fff;
-  box-shadow: 0 6px 30px var(--red-glow);
-}
-.btn-primary:hover {
-  box-shadow: 0 10px 40px var(--red-glow);
-  transform: translateY(-2px);
-}
-
-/* Large — bigger tap target for Trust Wallet browser (mobile) */
-.btn-large {
-  padding: 18px 28px;
-  font-size: 1.05rem;
-  border-radius: 16px;
-  box-shadow: 0 8px 40px var(--red-glow);
-}
-
-/* Danger — disconnect */
-.btn-danger {
-  background: transparent;
-  color: var(--red);
-  border: 1px solid rgba(235, 0, 41, 0.3);
-}
-.btn-danger:hover {
-  background: var(--red-dim);
-}
-
-/* ─── AppKit / WalletConnect modal ───────────────────────────────────────── */
-w3m-modal, wcm-modal {
-  z-index: 99999 !important;
-}
-
-/* ─── Responsive ─────────────────────────────────────────────────────────── */
-@media (max-width: 400px) {
-  .brand-name { font-size: 1.6rem; }
-  .card { padding: 22px 18px; }
-}
+/* ── WalletConnect modal ─────────────────────────────────────────────────── */
+w3m-modal,wcm-modal { z-index:99999 !important; }
