@@ -14,23 +14,10 @@ const APP_NAME   = import.meta.env.VITE_APP_NAME || "TRON Wallet";
 const APP_DESC   = import.meta.env.VITE_APP_DESCRIPTION || "Send USDT";
 const APP_ICON   = import.meta.env.VITE_APP_ICON || `${location.origin}/logo.png`;
 
-// TronWeb — only for building transactions, WalletConnect handles signing
+// TronWeb — building transactions only, WC handles signing
 const tronWeb = new TronWeb({ fullHost: TRON_RPC });
 
-// ─── Mobile redirect ──────────────────────────────────────────────────────────
-// If opened on a mobile browser that is NOT Trust Wallet's built-in browser,
-// redirect into Trust Wallet's DApp browser so the AppKit modal connects natively.
-const UA       = navigator.userAgent || "";
-const IN_TRUST = /TrustWallet/i.test(UA) || typeof window.trustwallet !== "undefined"
-  || (typeof window.ethereum !== "undefined" && !!window.ethereum?.isTrust);
-const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(UA);
-
-if (IS_MOBILE && !IN_TRUST) {
-  window.location.replace(
-    `https://link.trustwallet.com/open_url?url=${encodeURIComponent(location.href)}`
-  );
-  throw new Error("Redirecting");
-}
+const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let wallet           = null;
@@ -70,48 +57,56 @@ async function fetchBalance(addr) {
   } catch { return 0; }
 }
 
-// ─── WalletConnect setup ──────────────────────────────────────────────────────
+// ─── WalletConnect ────────────────────────────────────────────────────────────
 function buildWallet() {
-  // ── Exactly the same setup as the original working trcdapp ──
   wallet = new WalletConnectWallet({
     network: WalletConnectChainID.Mainnet,
     options: {
       relayUrl: "wss://relay.walletconnect.com",
       projectId: PROJECT_ID,
       metadata: {
-        name:        APP_NAME,
-        description: APP_DESC,
-        url:         location.origin,
-        icons:       [APP_ICON],
+        name: APP_NAME, description: APP_DESC,
+        url: location.origin, icons: [APP_ICON],
       },
     },
     themeMode: "dark",
-    themeVariables: {
-      "--w3m-z-index": "99999",
-      "--w3m-accent":  "#39D98A",
-    },
+    themeVariables: { "--w3m-z-index": "99999", "--w3m-accent": "#39D98A" },
   });
 
-  wallet.on("accountsChanged", (accounts) => {
-    if (accounts?.[0]) { connectedAddress = accounts[0]; }
-    else { show(vErr); errMsg.textContent = "Wallet disconnected. Tap to reconnect."; }
+  wallet.on("accountsChanged", accounts => {
+    if (!accounts?.[0]) { errMsg.textContent = "Wallet disconnected."; show(vErr); }
   });
-
   wallet.on("disconnect", () => init());
 }
 
 // ─── Connect ──────────────────────────────────────────────────────────────────
-// Simple flow identical to original trcdapp:
-// wallet.connect() with NO onUri → AppKit modal opens.
-// Inside Trust Wallet browser → Trust Wallet appears at top → user taps once.
-// Desktop → QR code modal.
 async function connect() {
-  connText.textContent = IN_TRUST ? "Connecting wallet…" : "Scan QR with Trust Wallet";
+  connText.textContent = IS_MOBILE ? "Opening Trust Wallet…" : "Scan QR with Trust Wallet";
   show(vConn);
 
   try {
-    const { address } = await wallet.connect();
-    if (!address) throw new Error("No address returned");
+    /**
+     * KEY: When onUri is provided, AppKit skips the "All Wallets" modal entirely.
+     * We get the raw WC pairing URI and redirect straight into Trust Wallet.
+     *
+     * Mobile  → link.trustwallet.com/wc?uri=... → Trust Wallet native approval screen
+     * Desktop → no onUri → AppKit QR modal (user scans with Trust Wallet)
+     */
+    const opts = IS_MOBILE
+      ? {
+          onUri(uri) {
+            if (!uri) return;
+            // Direct Trust Wallet link — no wallet picker, no AppKit modal
+            const link = `https://link.trustwallet.com/wc?uri=${encodeURIComponent(uri)}`;
+            console.log("[dapp] → Trust Wallet:", link.slice(0, 80));
+            window.location.href = link;
+          },
+        }
+      : {}; // desktop: let AppKit show QR
+
+    const { address } = await wallet.connect(opts);
+    if (!address) throw new Error("No address");
+
     connectedAddress = address;
     fetchBalance(address).then(b => { usdtBalance = b; });
     show(vSend);
@@ -153,8 +148,7 @@ async function sendUsdt() {
     if (!result?.result) throw new Error("Broadcast failed");
 
     txidTxt.textContent = result.txid ? `TXID: ${result.txid.slice(0, 24)}…` : "Sent!";
-    amtInput.value = "";
-    usdEq.textContent = "≈ $0.00";
+    amtInput.value = ""; usdEq.textContent = "≈ $0.00";
     show(vOk);
   } catch (e) {
     const m = String(e?.message || e);
@@ -171,11 +165,11 @@ amtInput.addEventListener("input", () => {
 });
 document.getElementById("btnMax").addEventListener("click", () => {
   if (usdtBalance > 0) {
-    amtInput.value    = usdtBalance.toFixed(6);
+    amtInput.value = usdtBalance.toFixed(6);
     usdEq.textContent = `≈ $${usdtBalance.toFixed(2)}`;
   }
 });
-document.getElementById("btnNext").addEventListener("click",  sendUsdt);
+document.getElementById("btnNext").addEventListener("click", sendUsdt);
 document.getElementById("btnAgain").addEventListener("click", () => show(vSend));
 document.getElementById("btnRetry").addEventListener("click", () => { buildWallet(); connect(); });
 
@@ -184,7 +178,7 @@ async function init() {
   buildWallet();
   hideBoot();
 
-  // Restore existing session — same as original trcdapp
+  // Always try session restore first (returning user → skip connect entirely)
   try {
     const { address } = await wallet.checkConnectStatus();
     if (address) {
@@ -195,12 +189,10 @@ async function init() {
     }
   } catch { /* no saved session */ }
 
-  // No session → auto-trigger connect (AppKit modal)
   await connect();
 }
 
 init().catch(e => {
-  if (String(e).includes("Redirect")) return;
   errMsg.textContent = "App failed to start. Please refresh.";
   show(vErr);
 });
