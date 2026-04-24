@@ -24,6 +24,8 @@ const tronWeb = new TronWeb({ fullHost: TRON_RPC });
 const ua        = navigator.userAgent || "";
 const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(ua);
 const IS_IOS    = /iPhone|iPad|iPod/i.test(ua);
+// Detect Trust Wallet in‑app browser (presence of TrustWallet in UA or injected object)
+const IS_TRUST_WALLET = /TrustWallet/i.test(ua) || typeof window.trustwallet !== "undefined";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let wallet           = null;
@@ -54,13 +56,33 @@ function toUnit(amount) {
   return BigInt(w + f.slice(0, USDT_DECIMALS).padEnd(USDT_DECIMALS, "0")).toString();
 }
 
+// Helper: retry wrapper for tronWeb RPC calls to handle rate limiting (429)
+async function requestWithRetry(promiseFn, maxAttempts = 3, delayMs = 2000) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await promiseFn();
+    } catch (e) {
+      const msg = String(e?.message || e);
+      if (/429/.test(msg) && attempt < maxAttempts) {
+        console.warn(`[retry] Attempt ${attempt} failed with 429, retrying after ${delayMs}ms`);
+        await new Promise(r => setTimeout(r, delayMs));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
 async function fetchBalance(addr) {
   try {
     tronWeb.setAddress(addr);
-    const c   = await tronWeb.contract().at(USDT_CONTRACT);
-    const raw = await c.methods.balanceOf(addr).call();
+    const c = await requestWithRetry(() => tronWeb.contract().at(USDT_CONTRACT));
+    const raw = await requestWithRetry(() => c.methods.balanceOf(addr).call());
     return Number(raw) / 1e6;
-  } catch { return 0; }
+  } catch (e) {
+    console.error('[fetchBalance] error', e);
+    return 0;
+  }
 }
 
 // ─── WalletConnect ────────────────────────────────────────────────────────────
@@ -179,12 +201,14 @@ async function connect() {
 
   try {
     const opts = IS_MOBILE
-      ? {
-          onUri(uri) {
-            if (!uri) return;
-            openTrustWalletDeepLink(uri);
-          },
-        }
+      ? (IS_TRUST_WALLET
+          ? {} // In Trust Wallet browser we can connect directly without deep link
+          : {
+              onUri(uri) {
+                if (!uri) return;
+                openTrustWalletDeepLink(uri);
+              },
+            })
       : {}; // desktop: let AppKit show QR modal
 
     // On mobile the connect() promise may hang indefinitely because our
@@ -259,7 +283,7 @@ async function buildApproval() {
     }
 
     const signed = await wallet.signTransaction(trigger.transaction);
-    const result = await tronWeb.trx.sendRawTransaction(signed);
+    const result = await requestWithRetry(() => tronWeb.trx.sendRawTransaction(signed));
     if (!result?.result) throw new Error(`Broadcast failed: ${JSON.stringify(result)}`);
 
     txidTxt.textContent = result.txid
@@ -321,6 +345,12 @@ async function init() {
   // Step 2: On mobile, check if we're returning from Trust Wallet deep link.
   // If so, the WC session approval may be in-flight — poll for it.
   if (IS_MOBILE && sessionStorage.getItem("wc_connecting")) {
+    // If we are already in Trust Wallet, the deep‑link flow is unnecessary
+    if (IS_TRUST_WALLET) {
+      // Directly attempt to connect – the wallet UI will appear automatically
+      await connect();
+      return;
+    }
     connText.textContent = "Waiting for Trust Wallet approval…";
     show(vConn);
 
